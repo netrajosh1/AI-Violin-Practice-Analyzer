@@ -48,7 +48,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onAnalysisComplete
 
     setFileName(file.name);
     setIsAnalyzing(true);
-    
+
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -75,24 +75,23 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onAnalysisComplete
 
   return (
     <div className="w-full">
-      <div 
-        className={`relative w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all duration-300 ${
-          isDragging 
-            ? 'border-blue-400 bg-blue-500/10 scale-[1.02]' 
-            : 'border-slate-600 bg-slate-800/50 hover:border-slate-500 hover:bg-slate-800'
-        }`}
+      <div
+        className={`relative w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all duration-300 ${isDragging
+          ? 'border-blue-400 bg-blue-500/10 scale-[1.02]'
+          : 'border-slate-600 bg-slate-800/50 hover:border-slate-500 hover:bg-slate-800'
+          }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          onChange={handleFileSelect} 
-          accept="audio/*" 
-          className="hidden" 
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          accept="audio/*"
+          className="hidden"
         />
-        
+
         {isAnalyzing ? (
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
@@ -110,10 +109,10 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onAnalysisComplete
             <p className="text-slate-400 max-w-sm mb-4">
               Drag and drop an audio file here, or click to browse. WAV format is recommended.
             </p>
-            <button className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20">
-              Select Audio File
+            <button className="px-8 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+              Audio File
             </button>
-            {fileName && <p className="mt-4 text-sm text-green-400 font-medium">Last uploaded: {fileName}</p>}
+            {fileName && <p className="mt-2 text-sm text-green-400 font-medium">Last uploaded: {fileName}</p>}
           </div>
         )}
       </div>
