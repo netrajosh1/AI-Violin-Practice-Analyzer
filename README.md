@@ -2,8 +2,6 @@
 
 An AI-powered web application designed to help violinists evaluate their pitch accuracy and intonation in real-time. By leveraging digital signal processing and audio feature extraction, this tool provides instant, actionable feedback on musical performances.
 
-![AI Violin Practice Analyzer](frontend/src/assets/hero.png) *(Note: Add a screenshot of the UI here)*
-
 ## 🚀 Features
 
 * **Audio Upload:** Drag-and-drop interface for uploading `.wav` recordings of violin playing.
