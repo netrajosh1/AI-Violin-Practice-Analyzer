@@ -71,8 +71,8 @@ export const PitchGraph: React.FC<PitchGraphProps> = ({ data, averageDeviation, 
             <Tooltip
               contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#f8fafc' }}
               labelFormatter={(val) => `Time: ${Number(val).toFixed(2)}s`}
-              formatter={(value: number, name: string, props: any) => [
-                `${value.toFixed(1)} cents (Note: ${props.payload.note})`,
+              formatter={(value: any, _name: any, props: any) => [
+                `${Number(value).toFixed(1)} cents (Note: ${props.payload.note})`,
                 'Deviation'
               ]}
             />

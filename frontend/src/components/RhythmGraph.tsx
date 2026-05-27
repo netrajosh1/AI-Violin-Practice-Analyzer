@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -29,6 +27,7 @@ export const RhythmGraph: React.FC<RhythmGraphProps> = ({ data }) => {
   if (!data || !data.durations || data.durations.length === 0) return null;
 
   const chartData = data.durations.map((duration, i) => ({
+    noteIndex: i + 1,
     time: data.onsets[i],
     duration: duration,
   }));
@@ -69,17 +68,17 @@ export const RhythmGraph: React.FC<RhythmGraphProps> = ({ data }) => {
         </div>
       </div>
 
-      <div className="h-80 w-full mt-8">
-        <h3 className="text-lg font-semibold text-slate-200 mb-4">Note Durations Over Time</h3>
+      <h3 className="text-lg font-semibold text-slate-200 mt-8 mb-4">Note Durations Over Time</h3>
+      <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+          <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: -20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis
               type="number"
-              dataKey="time"
-              name="Time"
+              dataKey="noteIndex"
+              name="Note"
               stroke="#94a3b8"
-              tickFormatter={(val) => `${val.toFixed(1)}s`}
+              tickFormatter={(val) => `#${val}`}
               domain={['auto', 'auto']}
             />
             <YAxis
@@ -97,7 +96,11 @@ export const RhythmGraph: React.FC<RhythmGraphProps> = ({ data }) => {
                 `${Number(value).toFixed(3)}s`,
                 name === 'duration' ? 'Note Duration' : name
               ]}
-              labelFormatter={(val) => `Time: ${Number(val).toFixed(2)}s`}
+              labelFormatter={(val, items) => {
+                const noteItem = items[0]?.payload;
+                const timeLabel = noteItem ? ` (at ${noteItem.time.toFixed(2)}s)` : '';
+                return `Note: #${val}${timeLabel}`;
+              }}
             />
             
             <ReferenceLine y={avgDuration} stroke="#a855f7" strokeWidth={2} strokeDasharray="3 3" />
