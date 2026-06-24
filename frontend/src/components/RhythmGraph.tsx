@@ -71,7 +71,7 @@ export const RhythmGraph: React.FC<RhythmGraphProps> = ({ data }) => {
       <h3 className="text-lg font-semibold text-slate-200 mt-8 mb-4">Note Durations Over Time</h3>
       <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: -20 }}>
+          <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: -20 }} barSize={20} barCategoryGap="10%">
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis
               type="number"
@@ -105,14 +105,8 @@ export const RhythmGraph: React.FC<RhythmGraphProps> = ({ data }) => {
             
             <ReferenceLine y={avgDuration} stroke="#a855f7" strokeWidth={2} strokeDasharray="3 3" />
             
-            <Scatter 
-              name="Notes" 
-              data={chartData} 
-              fill="#a855f7" 
-              shape="circle" 
-              isAnimationActive={true}
-            />
-          </ScatterChart>
+            <Bar dataKey="duration" fill="#a855f7" />
+          </BarChart>
         </ResponsiveContainer>
       </div>
 

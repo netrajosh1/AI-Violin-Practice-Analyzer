@@ -123,6 +123,25 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
         ref={scrollContainerRef}
         className="w-full overflow-x-auto bg-slate-950/60 rounded-xl border border-slate-800 relative p-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
       >
+        {/* Scroll arrows */}
+        <button
+          aria-label="Scroll left"
+          className="absolute bottom-2 left-2 z-30 p-1 bg-slate-700/70 text-slate-200 rounded-full hover:bg-slate-600 transition"
+          onClick={() => {
+            scrollContainerRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
+          }}
+        >
+          &#9664;
+        </button>
+        <button
+          aria-label="Scroll right"
+          className="absolute bottom-2 right-2 z-30 p-1 bg-slate-700/70 text-slate-200 rounded-full hover:bg-slate-600 transition"
+          onClick={() => {
+            scrollContainerRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
+          }}
+        >
+          &#9654;
+        </button>
         <div 
           className="relative h-44 select-none" 
           style={{ width: `${timelineWidth}px`, minWidth: '100%' }}

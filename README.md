@@ -42,9 +42,36 @@ The system analyzes uploaded violin recordings against either a metronome grid o
 
 ## 📊 Interactive Visualizations
 
+<<<<<<< HEAD
 ### Pitch Accuracy Graphs
 - Displays tuning deviation over time
 - Highlights sharp/flat regions dynamically
+=======
+### Rhythm Detection Endpoint
+The new **`/rhythm`** endpoint accepts an audio file and returns rhythm analysis JSON (tempo, onsets, durations, stability, average duration). This is useful when only timing metrics are needed.
+
+**Request**
+```bash
+POST http://127.0.0.1:8000/rhythm
+FormData:
+  file: <audio.wav>
+```
+
+**Response**
+```json
+{
+  "tempo": 120.0,
+  "onsets": [...],
+  "durations": [...],
+  "rhythm_stability": 0.045,
+  "average_duration": 0.5
+}
+```
+
+This replaces the original line at the end of the backend section.
+
+### Running the Frontend
+>>>>>>> 486e5f0 (rhythym endpoint)
 
 ### Timeline Comparison View
 - Dual-row horizontal timeline comparing:

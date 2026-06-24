@@ -27,7 +27,29 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-@app.post("/analyze")
+
+@app.post("/rhythm")
+async def analyze_rhythm_endpoint(file: UploadFile = File(...)):
+    """Accept a WAV/MP3 audio file and return rhythm analysis JSON.
+    This endpoint is useful for clients that need only rhythm metrics without pitch processing.
+    """
+    # Read uploaded file into temporary file
+    contents = await file.read()
+    temp_file = "temp_rhythm.wav"
+    with open(temp_file, "wb") as f:
+        f.write(contents)
+    try:
+        y, sr = librosa.load(temp_file)
+        rhythm_data = analyze_rhythm(y, sr)
+        return rhythm_data
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e)}
+    finally:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
 async def analyze_audio(
     file: UploadFile = File(...),
     midi_file: Optional[UploadFile] = File(None),
