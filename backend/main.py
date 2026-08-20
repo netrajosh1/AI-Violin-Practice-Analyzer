@@ -1,8 +1,12 @@
 import os
-import librosa
+import traceback
 import numpy as np
+# pyrefly: ignore [missing-import]
+import librosa
+# pyrefly: ignore [missing-import]
 from fastapi import FastAPI, UploadFile, File, Form
 from typing import Optional
+# pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
 
 from audio.pitch import process_pitches
@@ -43,20 +47,21 @@ async def analyze_rhythm_endpoint(file: UploadFile = File(...)):
         rhythm_data = analyze_rhythm(y, sr)
         return rhythm_data
     except Exception as e:
-        import traceback
         traceback.print_exc()
         return {"error": str(e)}
     finally:
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
+@app.post("/analyze")
 async def analyze_audio(
     file: UploadFile = File(...),
     midi_file: Optional[UploadFile] = File(None),
     expected_bpm: Optional[float] = Form(None)
 ):
     contents = await file.read()
-    temp_file = "temp.wav"
+    ext = os.path.splitext(file.filename)[1] if file.filename and os.path.splitext(file.filename)[1] else ".wav"
+    temp_file = f"temp{ext}"
     
     with open(temp_file, "wb") as f:
         f.write(contents)
@@ -147,7 +152,6 @@ async def analyze_audio(
             "overall_score": round(overall_score, 1)
         }
     except Exception as e:
-        import traceback
         traceback.print_exc()
         return {"error": str(e)}
     finally:

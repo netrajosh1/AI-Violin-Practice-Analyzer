@@ -24,16 +24,17 @@ interface AlignmentAnalysis {
 
 interface TimelineComparisonProps {
   alignmentData: AlignmentAnalysis | null;
+  theme?: 'light' | 'dark';
 }
 
-export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmentData }) => {
+export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmentData, theme = 'light' }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   if (!alignmentData || !alignmentData.matches || alignmentData.matches.length === 0) return null;
 
+  const isLight = theme === 'light';
   const { matches, unmatched_actual, unmatched_expected } = alignmentData;
 
-  // 1. Gather all Expected events (matched + missed)
   const expectedNotesList = [
     ...matches.map((m, idx) => ({
       id: `match-${idx}`,
@@ -50,16 +51,12 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
       index: idx
     }))
   ];
-  // Sort chronologically
   expectedNotesList.sort((a, b) => a.onset - b.onset);
 
-  // 2. Space Expected events to avoid overlap
-  // Note pill width is 36px. At 200px/sec scale, 36px is 0.18s.
-  // Let's use 0.25 seconds of minSpacing to give a comfortable visual margin.
   const pixelsPerSecond = 200;
   const pillWidth = 36;
   const minSpacingSeconds = 0.25;
-  
+
   const spacedExpectedOnsets = new Map<string, number>();
   let lastExpectedSpaced = -minSpacingSeconds;
 
@@ -72,7 +69,6 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
     lastExpectedSpaced = spacedOnset;
   });
 
-  // 3. Gather all Actual events (matched + extra)
   const actualNotesList = [
     ...matches.map((m, idx) => ({
       id: `match-${idx}`,
@@ -91,7 +87,6 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
   ];
   actualNotesList.sort((a, b) => a.onset - b.onset);
 
-  // 4. Space Actual events to avoid overlap
   const spacedActualOnsets = new Map<string, number>();
   let lastActualSpaced = -minSpacingSeconds;
 
@@ -104,29 +99,40 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
     lastActualSpaced = spacedOnset;
   });
 
-  // Calculate width of timeline container based on maximum spaced position
   const maxTime = Math.max(lastExpectedSpaced, lastActualSpaced, 3.0) + 0.5;
   const timelineWidth = Math.ceil(maxTime * pixelsPerSecond);
 
   return (
-    <div className="w-full bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
-      <h2 className="text-2xl font-bold mb-2 text-slate-100 flex items-center">
-        <span className="bg-indigo-500 w-3 h-8 rounded-full mr-3"></span>
-        Note Alignment Timeline
+    <div className={`w-full rounded-xl p-6 shadow-xl border transition-all ${
+      isLight ? 'bg-[#ffffff] border-[#e2d5c3]' : 'bg-[#1c140e] border-[#3d2b1f]'
+    }`}>
+      <h2 className={`text-2xl font-bold mb-2 flex items-center ${
+        isLight ? 'text-[#3b180d]' : 'text-[#fef3c7]'
+      }`}>
+        <span className="bg-amber-600 w-3 h-8 rounded-full mr-3"></span>
+        Note Synchronization Timeline
       </h2>
-      <p className="text-sm text-slate-400 mb-6">
-        Scroll horizontally to inspect note synchronization. Note positions are spaced out sequentially to avoid overlapping.
+      <p className={`text-sm mb-6 ${isLight ? 'text-[#785b48]' : 'text-[#d1c2b0]'}`}>
+        Scroll horizontally to inspect played notes vs reference grid. Connectors indicate timing alignment.
       </p>
 
       {/* Horizontally Scrollable Container */}
       <div 
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto bg-slate-950/60 rounded-xl border border-slate-800 relative p-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
+        className={`w-full overflow-x-auto rounded-xl border relative p-4 scrollbar-thin ${
+          isLight
+            ? 'bg-[#fcf8f2] border-[#e2d5c3] scrollbar-thumb-[#d6c4b0]'
+            : 'bg-[#120d09]/90 border-[#3d2b1f] scrollbar-thumb-[#3d2b1f]'
+        }`}
       >
         {/* Scroll arrows */}
         <button
           aria-label="Scroll left"
-          className="absolute bottom-2 left-2 z-30 p-1 bg-slate-700/70 text-slate-200 rounded-full hover:bg-slate-600 transition"
+          className={`absolute bottom-2 left-2 z-30 p-1.5 rounded-full border transition cursor-pointer ${
+            isLight
+              ? 'bg-[#ffffff] text-[#3b180d] border-[#d6c4b0] hover:bg-[#f4ebe1]'
+              : 'bg-[#281c13] text-[#fef3c7] border-[#3d2b1f] hover:bg-[#36261a]'
+          }`}
           onClick={() => {
             scrollContainerRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
           }}
@@ -135,7 +141,11 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
         </button>
         <button
           aria-label="Scroll right"
-          className="absolute bottom-2 right-2 z-30 p-1 bg-slate-700/70 text-slate-200 rounded-full hover:bg-slate-600 transition"
+          className={`absolute bottom-2 right-2 z-30 p-1.5 rounded-full border transition cursor-pointer ${
+            isLight
+              ? 'bg-[#ffffff] text-[#3b180d] border-[#d6c4b0] hover:bg-[#f4ebe1]'
+              : 'bg-[#281c13] text-[#fef3c7] border-[#3d2b1f] hover:bg-[#36261a]'
+          }`}
           onClick={() => {
             scrollContainerRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
           }}
@@ -147,8 +157,12 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
           style={{ width: `${timelineWidth}px`, minWidth: '100%' }}
         >
           {/* Horizontal Track Lanes */}
-          <div className="absolute top-2 left-0 right-0 h-10 bg-slate-900/40 rounded-lg border border-slate-800/30"></div>
-          <div className="absolute top-26 left-0 right-0 h-10 bg-slate-900/40 rounded-lg border border-slate-800/30"></div>
+          <div className={`absolute top-2 left-0 right-0 h-10 rounded-lg border ${
+            isLight ? 'bg-[#f4ebe1] border-[#e2d5c3]' : 'bg-[#1c140e]/60 border-[#3d2b1f]/40'
+          }`}></div>
+          <div className={`absolute top-26 left-0 right-0 h-10 rounded-lg border ${
+            isLight ? 'bg-[#f4ebe1] border-[#e2d5c3]' : 'bg-[#1c140e]/60 border-[#3d2b1f]/40'
+          }`}></div>
 
           {/* SVG Connecting Lines Overlay */}
           <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-10">
@@ -156,22 +170,21 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
               const xExpected = (spacedExpectedOnsets.get(`match-${idx}`) || 0) * pixelsPerSecond;
               const xActual = (spacedActualOnsets.get(`match-${idx}`) || 0) * pixelsPerSecond;
               
-              // Colors based on status
-              let strokeColor = '#10b981'; // green (on-time)
-              if (m.status === 'early') strokeColor = '#f59e0b'; // orange
-              if (m.status === 'late') strokeColor = '#ef4444'; // red
+              let strokeColor = isLight ? '#059669' : '#10b981'; // green (on-time)
+              if (m.status === 'early') strokeColor = isLight ? '#d97706' : '#fbbf24'; // acoustic gold
+              if (m.status === 'late') strokeColor = isLight ? '#e11d48' : '#f43f5e'; // ruby red
 
               return (
                 <line
                   key={`line-${idx}`}
                   x1={xExpected + pillWidth / 2}
-                  y1={42} // Bottom of expected notes row (top-2 + h-10 = 12px + 40px)
+                  y1={42}
                   x2={xActual + pillWidth / 2}
-                  y2={104} // Top of actual notes row (top-26 = 104px)
+                  y2={104}
                   stroke={strokeColor}
                   strokeWidth={2}
                   strokeDasharray={m.status === 'on-time' ? undefined : '3 3'}
-                  opacity={0.65}
+                  opacity={0.8}
                 />
               );
             })}
@@ -179,16 +192,21 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
 
           {/* TOP ROW: Expected Notes */}
           <div className="absolute top-2 left-0 right-0 h-10 flex items-center">
-            <span className="absolute -left-2 top-2.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 origin-left -rotate-90 select-none">
+            <span className={`absolute -left-2 top-2.5 text-[9px] font-bold uppercase tracking-wider origin-left -rotate-90 select-none ${
+              isLight ? 'text-[#785b48]' : 'text-[#a39280]'
+            }`}>
               Expected
             </span>
-            {/* Aligned Expected Notes */}
             {matches.map((m, idx) => {
               const x = (spacedExpectedOnsets.get(`match-${idx}`) || 0) * pixelsPerSecond;
               return (
                 <div
                   key={`exp-${idx}`}
-                  className="absolute h-10 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 flex flex-col items-center justify-center shadow-md z-20"
+                  className={`absolute h-10 rounded-lg border flex flex-col items-center justify-center shadow-md z-20 ${
+                    isLight
+                      ? 'bg-[#ffffff] border-[#d6c4b0] text-[#3b180d]'
+                      : 'bg-[#281c13] border-[#3d2b1f] text-[#fef3c7]'
+                  }`}
                   style={{ 
                     left: `${x}px`, 
                     width: `${pillWidth}px` 
@@ -196,17 +214,20 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
                   title={`Expected note: ${m.note_name} at ${m.expected_onset.toFixed(2)}s`}
                 >
                   <span className="text-[10px] font-bold leading-tight">{m.note_name}</span>
-                  <span className="text-[7px] text-slate-500 font-normal leading-none mt-0.5">{m.expected_onset.toFixed(1)}s</span>
+                  <span className="text-[7px] font-normal leading-none mt-0.5 opacity-75">{m.expected_onset.toFixed(1)}s</span>
                 </div>
               );
             })}
-            {/* Missed Expected Notes (Deletions) */}
             {unmatched_expected.map((note, idx) => {
               const x = (spacedExpectedOnsets.get(`missed-${idx}`) || 0) * pixelsPerSecond;
               return (
                 <div
                   key={`exp-miss-${idx}`}
-                  className="absolute h-10 rounded-lg bg-red-950/20 border border-red-500/30 text-red-400/80 flex flex-col items-center justify-center shadow-md z-20 opacity-60"
+                  className={`absolute h-10 rounded-lg border flex flex-col items-center justify-center shadow-md z-20 opacity-75 ${
+                    isLight
+                      ? 'bg-rose-100 border-rose-300 text-rose-800'
+                      : 'bg-rose-950/40 border-rose-700/50 text-rose-300'
+                  }`}
                   style={{ 
                     left: `${x}px`, 
                     width: `${pillWidth}px` 
@@ -214,8 +235,8 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
                   title={`Missed note: ${note.note_name || note.note_num} at ${note.onset.toFixed(2)}s`}
                 >
                   <span className="text-[10px] font-bold leading-tight">{note.note_name || note.note_num}</span>
-                  <span className="text-[7px] text-red-500/70 font-normal leading-none mt-0.5">missed</span>
-                  <span className="absolute -top-1 -right-1 text-[7px] bg-red-600 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center border border-slate-900 font-bold">
+                  <span className="text-[7px] font-normal leading-none mt-0.5">missed</span>
+                  <span className="absolute -top-1 -right-1 text-[7px] bg-rose-600 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">
                     ✕
                   </span>
                 </div>
@@ -225,15 +246,16 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
 
           {/* BOTTOM ROW: Actual Played Notes */}
           <div className="absolute top-26 left-0 right-0 h-10 flex items-center">
-            <span className="absolute -left-2 top-2.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 origin-left -rotate-90 select-none">
+            <span className={`absolute -left-2 top-2.5 text-[9px] font-bold uppercase tracking-wider origin-left -rotate-90 select-none ${
+              isLight ? 'text-[#785b48]' : 'text-[#a39280]'
+            }`}>
               Played
             </span>
-            {/* Aligned Played Notes */}
             {matches.map((m, idx) => {
               const x = (spacedActualOnsets.get(`match-${idx}`) || 0) * pixelsPerSecond;
-              let bgColor = 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300';
-              if (m.status === 'early') bgColor = 'bg-amber-500/20 border-amber-500/60 text-amber-300';
-              if (m.status === 'late') bgColor = 'bg-rose-500/20 border-rose-500/60 text-rose-300';
+              let bgColor = isLight ? 'bg-emerald-100 border-emerald-400 text-emerald-900' : 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300';
+              if (m.status === 'early') bgColor = isLight ? 'bg-amber-100 border-amber-400 text-amber-900' : 'bg-amber-500/20 border-amber-500/60 text-amber-300';
+              if (m.status === 'late') bgColor = isLight ? 'bg-rose-100 border-rose-400 text-rose-900' : 'bg-rose-500/20 border-rose-500/60 text-rose-300';
 
               return (
                 <div
@@ -252,13 +274,16 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
                 </div>
               );
             })}
-            {/* Extra Notes Played (Insertions) */}
             {unmatched_actual.map((note, idx) => {
               const x = (spacedActualOnsets.get(`extra-${idx}`) || 0) * pixelsPerSecond;
               return (
                 <div
                   key={`act-extra-${idx}`}
-                  className="absolute h-10 rounded-lg bg-slate-800 border border-slate-600 text-slate-400 flex flex-col items-center justify-center shadow-md z-20 opacity-60"
+                  className={`absolute h-10 rounded-lg border flex flex-col items-center justify-center shadow-md z-20 opacity-75 ${
+                    isLight
+                      ? 'bg-[#ffffff] border-[#d6c4b0] text-[#785b48]'
+                      : 'bg-[#281c13] border-[#3d2b1f] text-[#d1c2b0]'
+                  }`}
                   style={{ 
                     left: `${x}px`, 
                     width: `${pillWidth}px` 
@@ -266,8 +291,8 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
                   title={`Extra note: ${note.note_name || note.note_num} at ${note.onset.toFixed(2)}s`}
                 >
                   <span className="text-[10px] font-bold leading-tight">{note.note_name || note.note_num}</span>
-                  <span className="text-[7px] text-slate-500 font-normal leading-none mt-0.5">extra</span>
-                  <span className="absolute -top-1 -right-1 text-[7px] bg-slate-500 text-slate-900 rounded-full w-3.5 h-3.5 flex items-center justify-center border border-slate-900 font-extrabold">
+                  <span className="text-[7px] font-normal leading-none mt-0.5">extra</span>
+                  <span className="absolute -top-1 -right-1 text-[7px] bg-amber-600 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center font-extrabold">
                     +
                   </span>
                 </div>
@@ -278,27 +303,39 @@ export const TimelineComparison: React.FC<TimelineComparisonProps> = ({ alignmen
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 mt-5 text-xs text-slate-400 justify-center">
+      <div className={`flex flex-wrap items-center gap-4 mt-5 text-xs justify-center ${
+        isLight ? 'text-[#785b48]' : 'text-[#d1c2b0]'
+      }`}>
         <div className="flex items-center space-x-1.5">
-          <span className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/60 inline-block"></span>
+          <span className={`w-3 h-3 rounded border inline-block ${
+            isLight ? 'bg-emerald-100 border-emerald-400' : 'bg-emerald-500/20 border-emerald-500/60'
+          }`}></span>
           <span>On-Time Note (within ±60ms)</span>
         </div>
         <div className="flex items-center space-x-1.5">
-          <span className="w-3 h-3 rounded bg-amber-500/20 border border-amber-500/60 inline-block"></span>
+          <span className={`w-3 h-3 rounded border inline-block ${
+            isLight ? 'bg-amber-100 border-amber-400' : 'bg-amber-500/20 border-amber-500/60'
+          }`}></span>
           <span>Rushing (Early)</span>
         </div>
         <div className="flex items-center space-x-1.5">
-          <span className="w-3 h-3 rounded bg-rose-500/20 border border-rose-500/60 inline-block"></span>
+          <span className={`w-3 h-3 rounded border inline-block ${
+            isLight ? 'bg-rose-100 border-rose-400' : 'bg-rose-500/20 border-rose-500/60'
+          }`}></span>
           <span>Dragging (Late)</span>
         </div>
         <div className="flex items-center space-x-1.5">
-          <span className="w-3 h-3 rounded bg-slate-800 border border-slate-600 inline-block text-center text-[8px] leading-3 text-slate-400 font-bold">
+          <span className={`w-3 h-3 rounded border inline-block text-center text-[8px] leading-3 font-bold ${
+            isLight ? 'bg-[#ffffff] border-[#d6c4b0] text-[#785b48]' : 'bg-[#281c13] border-[#3d2b1f] text-[#d1c2b0]'
+          }`}>
             +
           </span>
           <span>Extra Note Played</span>
         </div>
         <div className="flex items-center space-x-1.5">
-          <span className="w-3 h-3 rounded bg-red-950/20 border border-red-500/30 inline-block text-center text-[8px] leading-3 text-red-400 font-bold">
+          <span className={`w-3 h-3 rounded border inline-block text-center text-[8px] leading-3 font-bold ${
+            isLight ? 'bg-rose-100 border-rose-300 text-rose-700' : 'bg-rose-950/40 border-rose-600/50 text-rose-300'
+          }`}>
             ✕
           </span>
           <span>Missed Note</span>
