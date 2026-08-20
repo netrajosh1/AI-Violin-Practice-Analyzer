@@ -1,303 +1,154 @@
 # AI Violin Practice Analyzer 🎻
 
-An AI-powered web application designed to help violinists evaluate both **intonation accuracy** and **rhythmic precision** through advanced audio signal processing, MIDI alignment, and intelligent performance feedback.
+An AI-powered web application designed to help violinists evaluate both **intonation accuracy** and **rhythmic precision** through advanced audio signal processing, live microphone recording, MIDI alignment, and intelligent performance coaching.
 
-The system analyzes uploaded violin recordings against either a metronome grid or a MIDI reference performance, then generates detailed visualizations and coaching insights to help musicians practice more effectively.
+The system analyzes live microphone recordings or uploaded audio files against a metronome grid or MIDI reference performance, then generates detailed visualizations and personalized coaching insights to help musicians practice more effectively.
 
 ---
 
 # 🚀 Features
 
-## 🎵 Audio Upload & Performance Analysis
-- Drag-and-drop interface for uploading `.wav` violin recordings
-- Analyze performances against:
-  - No reference (free intonation analysis)
-  - Metronome BPM grid
-  - MIDI reference file
-- One-click **Analyze Performance** workflow
+## 🎙️ In-Browser Live Microphone Recording
+- Record violin practice directly inside the browser using your device's microphone
+- Real-time recording timer counter (`RECORDING: 00:15`) with live pulsing indicators
+- Built-in HTML5 Audio Player preview to listen back to your recording before analyzing
+- Automatic client-side 16-bit PCM **WAV encoding** via Web Audio API for 100% precision during audio signal processing
 
----
+## 📁 Audio Upload & Baseline Selection
+- Support for uploading `.wav`, `.mp3`, `.m4a`, and `.webm` violin recordings
+- Flexible baseline reference selection:
+  - **No Reference**: Pure intonation and rhythm stability evaluation
+  - **Metronome BPM Grid**: Align timing against expected beats per minute
+  - **MIDI Reference File**: Full note-for-note sequence alignment against reference score
+
+## ☀️ / 🌙 Light & Dark Theme Modes
+- **Light Mode (Warm Cream & Deep Mahogany)**: Soft warm cream background (`#faf6ee`) paired with rich mahogany brown typography and acoustic gold buttons. Warm, traditional, and readable in bright rooms.
+- **Dark Mode (Dark Stage Wood & Amber Glow)**: Deep charcoal wood atmosphere (`#140f0c`) with ambient amber glows (`#f59e0b`). Ideal for musicians practicing on stage or in dim practice rooms.
+- One-click toggle switch in header.
 
 ## 🎯 Pitch & Intonation Analysis
 - Fundamental frequency extraction using Librosa
-- Converts detected frequencies into musical note information
-- Calculates tuning deviations in cents
-- Identifies consistently sharp or flat tendencies
-- Detects problematic pitch regions and unstable notes
+- Converts detected frequencies into standard musical pitch notes
+- Calculates exact tuning deviations in **cents**
+- Identifies overall sharp (+) or flat (-) tendencies
+- Computes absolute variance metrics to gauge pitch stability
 
----
-
-## ⏱️ Rhythm + Timing Analysis (Phase 2)
-- MIDI parsing using `mido`
-- Needleman–Wunsch sequence alignment algorithm for:
-  - Insertions
-  - Missing notes
+## ⏱️ Rhythm + Timing Alignment
+- MIDI parsing via `mido`
+- **Needleman–Wunsch sequence alignment algorithm** to handle:
+  - Insertions (extra notes played)
+  - Deletions (missed notes)
   - Minor pitch mismatches
 - Dynamic onset alignment between expected and played notes
-- Tempo scaling and latency correction using linear regression
-- Metronome grid synchronization against expected BPM
-- Millisecond-level timing drift analysis
+- Tempo scaling and latency compensation using linear regression
+- Millisecond-level timing drift analysis relative to $\pm 60\text{ms}$ human perception tolerance
+
+## 📊 Interactive Visualizations
+- **Pitch Accuracy Graphs**: Displays cents deviation over time with target intonation center lines and tolerance bands
+- **Note Alignment Timeline View**: Dual-row interactive horizontal timeline comparing expected vs. actual played note onsets with status connectors (on-time, early/rushing, late/dragging)
+- **Rhythm Drift Graph**: Bar chart showing note-by-note timing errors in milliseconds against a shaded $\pm 60\text{ms}$ tolerance band
+
+## 🤖 AI Coaching Feedback Engine
+Smart feedback system synthesizes performance data to generate:
+- **Coach's Summary**: High-level evaluation of the practice session
+- **Key Strengths**: Specific areas executed accurately (e.g., solid intonation centering, steady tempo)
+- **Focus Areas**: Actionable recommendations for improvement (e.g., avoiding rushing eighth-note passages, shifts in higher positions)
+- **Detailed Bullet Insights**: Targeted observations for both intonation and rhythm
 
 ---
 
-## 📊 Interactive Visualizations
+# 🔌 API Endpoints
 
-<<<<<<< HEAD
-### Pitch Accuracy Graphs
-- Displays tuning deviation over time
-- Highlights sharp/flat regions dynamically
-=======
+### Performance Analysis Endpoint
+**`POST /analyze`**
+Accepts performance audio and optional reference settings to produce full intonation, rhythm, alignment, and coaching payloads.
+```bash
+POST http://127.0.0.1:8000/analyze
+FormData:
+  file: <recorded_violin.wav>
+  midi_file: <optional_reference.mid>
+  expected_bpm: <optional_number>
+```
+
 ### Rhythm Detection Endpoint
-The new **`/rhythm`** endpoint accepts an audio file and returns rhythm analysis JSON (tempo, onsets, durations, stability, average duration). This is useful when only timing metrics are needed.
-
-**Request**
+**`POST /rhythm`**
+Accepts an audio file and returns rhythm analysis JSON (tempo, onsets, durations, stability metric).
 ```bash
 POST http://127.0.0.1:8000/rhythm
 FormData:
   file: <audio.wav>
 ```
 
-**Response**
-```json
-{
-  "tempo": 120.0,
-  "onsets": [...],
-  "durations": [...],
-  "rhythm_stability": 0.045,
-  "average_duration": 0.5
-}
-```
-
-This replaces the original line at the end of the backend section.
-
-### Running the Frontend
->>>>>>> 486e5f0 (rhythym endpoint)
-
-### Timeline Comparison View
-- Dual-row horizontal timeline comparing:
-  - Expected note onsets
-  - Actual played onsets
-- Color-coded alignment connectors for:
-  - Early notes
-  - Late notes
-  - Correctly aligned notes
-
-### Rhythm Drift Graph
-- Visualizes timing errors in milliseconds
-- Helps identify rushing or dragging tendencies
-
----
-
-## 🤖 AI Coaching Feedback System
-
-Smart coaching engine generates personalized feedback including:
-- Strengths detected in the performance
-- Rhythm consistency observations
-- Intonation trend analysis
-- Specific problematic notes/passages
-- Early/late onset tendencies
-- Practice recommendations tailored to the performer
-
-Example feedback:
-
-> “Your intonation becomes consistently sharp during higher position shifts, and you tend to rush repeated eighth-note passages after tempo increases.”
-
 ---
 
 # 🛠️ Architecture & Tech Stack
 
-This project uses a decoupled frontend/backend architecture.
-
----
-
-# Frontend
-
-- **Framework:** React + TypeScript (Vite)
-- **Styling:** Tailwind CSS v4
+## Frontend
+- **Framework:** React 19 + TypeScript (Vite)
+- **Styling:** Tailwind CSS v4 (Custom Violin Theme tokens & Light/Dark Mode)
+- **Audio Capture:** Web Audio API & MediaRecorder API (with client-side PCM WAV encoder)
 - **Visualization:** Recharts
 - **HTTP Client:** Axios
 
-### Core Frontend Components
-- `AudioUploader.tsx`
-- `PerformanceCoaching.tsx`
-- `TimelineComparison.tsx`
-- `RhythmDriftGraph.tsx`
-
----
-
-# Backend
-
+## Backend
 - **Framework:** FastAPI (Python)
-- **Audio Processing:** Librosa, NumPy, SciPy
-- **MIDI Processing:** mido
-- **Machine Logic:** Custom alignment + regression systems
+- **Audio Signal Processing:** Librosa, NumPy, SciPy, SoundFile
+- **MIDI Processing:** Mido
 - **Server:** Uvicorn
-
-### Core Backend Modules
-- `midi_compare.py`
-- `feedback.py`
-
----
-
-# 🧠 Core Algorithms
-
-## Sequence Alignment
-Implements a custom Needleman–Wunsch alignment system to map:
-- Expected note sequences
-- Played violin note sequences
-
-This enables robust handling of:
-- Missed notes
-- Extra notes
-- Timing inconsistencies
-- Minor pitch inaccuracies
-
----
-
-## Tempo & Latency Compensation
-Uses linear regression to:
-- Estimate performance latency
-- Detect tempo drift
-- Dynamically scale expected timing grids
-
-This prevents unfair penalties for:
-- Slight delayed starts
-- Natural tempo fluctuations
-
----
-
-## Coaching Intelligence Layer
-The feedback engine analyzes:
-- Pitch deviation trends
-- Timing consistency
-- Repeated note errors
-- Rhythm drift patterns
-
-Then synthesizes these observations into human-readable coaching guidance.
 
 ---
 
 # 🏃‍♂️ Getting Started
 
-# Prerequisites
-
-- Python 3.9+
-- Node.js 18+
-- npm
+### Prerequisites
+- **Python 3.9+**
+- **Node.js 18+**
+- **npm**
 
 ---
 
-# Running the Backend
+### 1. Running the Backend
 
-Navigate to the backend directory:
-
+Navigate to the `backend` directory:
 ```bash
 cd backend
 ```
 
-Create and activate a virtual environment:
-
+Activate the project virtual environment (or create one):
 ```bash
-python3 -m venv venv
 source venv/bin/activate
-
-# On Windows:
-venv\Scripts\activate
 ```
 
-Install dependencies:
-
+Install backend dependencies (if needed):
 ```bash
-pip install fastapi uvicorn librosa numpy scipy matplotlib soundfile python-multipart mido
+pip install fastapi uvicorn librosa numpy scipy soundfile python-multipart mido
 ```
 
-Start the FastAPI server:
-
+Start the FastAPI backend server:
 ```bash
-uvicorn main:app --reload
+venv/bin/uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
-
-Backend runs at:
-
-```text
-http://127.0.0.1:8000
-```
+Backend API will run at: `http://127.0.0.1:8000`
 
 ---
 
-# Running the Frontend
+### 2. Running the Frontend
 
-Navigate to the frontend directory:
-
+Navigate to the `frontend` directory:
 ```bash
 cd frontend
 ```
 
-Install dependencies:
-
+Install frontend dependencies:
 ```bash
 npm install
 ```
 
 Start the Vite development server:
-
 ```bash
 npm run dev
 ```
-
-Frontend runs at:
-
-```text
-http://localhost:5173
-```
-
----
-
-# ✅ Verification
-
-- Backend successfully loads and executes inside its virtual environment
-- Frontend compiles successfully with:
-
-```bash
-npm run build
-```
-
-- Zero TypeScript/Vite compilation errors
-- End-to-end upload → analysis → visualization pipeline verified
-
----
-
-# 🔮 Roadmap / Future Features
-
-## ✅ Phase 1 — Intonation Analysis
-Completed:
-- Pitch extraction
-- Cents deviation analysis
-- Pitch visualization
-
-## ✅ Phase 2 — Rhythm + Timing Analysis
-Completed:
-- MIDI alignment
-- Timing drift analysis
-- Tempo scaling
-- Coaching feedback
-- Timeline visualizations
-
-## 🔜 Phase 3 — Sheet Music Matching
-- Parse MusicXML / sheet music directly
-- Automatic expected-note generation
-- Phrase segmentation analysis
-
-## 🔜 Phase 4 — Real-Time Analysis
-- Live microphone input
-- Instant visual feedback
-- Real-time tuning/rhythm alerts
-
-## 🔜 Phase 5 — Advanced AI Practice Coach
-- LLM-generated performance summaries
-- Personalized exercise generation
-- Long-term practice tracking
-- Adaptive difficulty recommendations
+Frontend Web App will run at: `http://localhost:5173`
 
 ---
 
