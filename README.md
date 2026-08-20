@@ -24,7 +24,7 @@ The system analyzes live microphone recordings or uploaded audio files against a
 ## ☀️ / 🌙 Light & Dark Theme Modes
 - **Light Mode (Warm Cream & Deep Mahogany)**: Soft warm cream background (`#faf6ee`) paired with rich mahogany brown typography and acoustic gold buttons. Warm, traditional, and readable in bright rooms.
 - **Dark Mode (Dark Stage Wood & Amber Glow)**: Deep charcoal wood atmosphere (`#140f0c`) with ambient amber glows (`#f59e0b`). Ideal for musicians practicing on stage or in dim practice rooms.
-- One-click toggle switch in header.
+- One-click toggle switch in header using simple `☀️` and `🌙` icons.
 
 ## 🎯 Pitch & Intonation Analysis
 - Fundamental frequency extraction using Librosa
@@ -57,6 +57,28 @@ Smart feedback system synthesizes performance data to generate:
 
 ---
 
+# 🌐 Vercel & Cloud Deployment
+
+## Frontend Deployment (Vercel)
+The React + Vite frontend is pre-configured for seamless deployment on **Vercel**:
+
+1. Connect your repository to **Vercel**.
+2. In Vercel Project Settings $\rightarrow$ **General**:
+   - **Root Directory**: `frontend` (or leave default when using root `vercel.json`)
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. Configure the environment variable:
+   - **`VITE_API_URL`**: `https://your-backend-api-url.com` (points to your deployed FastAPI server)
+
+The repository includes pre-configured `vercel.json` rewrite rules (`/(.*)` $\rightarrow$ `/index.html`) to ensure smooth Single Page Application (SPA) routing without 404 errors.
+
+## Backend API Deployment
+The FastAPI audio processing engine can be deployed on services supporting Python environments (e.g., Render, Railway, Fly.io, or AWS/DigitalOcean):
+- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+---
+
 # 🔌 API Endpoints
 
 ### Performance Analysis Endpoint
@@ -85,6 +107,7 @@ FormData:
 
 ## Frontend
 - **Framework:** React 19 + TypeScript (Vite)
+- **Deployment:** Vercel
 - **Styling:** Tailwind CSS v4 (Custom Violin Theme tokens & Light/Dark Mode)
 - **Audio Capture:** Web Audio API & MediaRecorder API (with client-side PCM WAV encoder)
 - **Visualization:** Recharts
